@@ -70,6 +70,20 @@ footer{border-top:1px solid var(--line);padding-block:24px;font-size:.85rem;colo
   .steps li::before{margin:0;grid-row:span 2}
 }
 @media(max-width:480px){.grid{grid-template-columns:1fr}}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;margin-top:20px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:22px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.full{grid-column:1/-1}
+.f label{font-weight:600;font-size:.9rem}
+.form input,.form select,.form textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;width:100%}
+.form textarea{min-height:90px;resize:vertical}
+.form input:focus-visible,.form select:focus-visible,.form textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.form button{border:0;cursor:pointer;justify-self:start;align-self:flex-start}
+.form button:disabled{opacity:.6;cursor:wait}
+.hp{display:none}
+.result{margin:10px 0 0;font-weight:600}
+.result.ok{color:var(--accent)}
+.result.bad{color:#C0392B}
+@media(max-width:600px){.form{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -161,16 +175,57 @@ footer{border-top:1px solid var(--line);padding-block:24px;font-size:.85rem;colo
   </div>
 </section>
 
-<section class="alt cta" id="apply">
+<section class="alt" id="apply">
   <div class="wrap">
-    <h2>Ready to apply?</h2>
-    <p>Email us your name, licence type, pickup point and preferred date.</p>
-    <p class="email"><a href="mailto:hello@example.com?subject=Mainland%20licence%20application">hello@example.com</a></p>
+    <h2>Apply now</h2>
+    <p class="muted">Send us your details and we'll reply within one working day to confirm price and date.</p>
+    <form id="form" class="form">
+      <input type="hidden" name="access_key" value="4d98e02a-4c4c-44f3-ad24-353b8693a753">
+      <input type="hidden" name="subject" value="New Mainland licence application">
+      <input type="hidden" name="from_name" value="Mainland Licence Website">
+      <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
+      <div class="f"><label for="name">Full name</label><input id="name" name="name" autocomplete="name" required></div>
+      <div class="f"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+      <div class="f"><label for="phone">Phone / WhatsApp</label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
+      <div class="f"><label for="licence">Licence type</label>
+        <select id="licence" name="licence_type"><option>Hong Kong licence</option><option>Foreign licence</option></select></div>
+      <div class="f"><label for="pickup">Pickup point</label>
+        <select id="pickup" name="pickup_point">
+          <option>Lok Ma Chau / Huanggang border</option>
+          <option>Shenzhen Bay border</option>
+          <option>Lo Wu / Luohu border</option>
+          <option>Futian Checkpoint</option>
+          <option>Shenzhen Bao'an Airport</option>
+          <option>Hotel in Shenzhen</option>
+        </select></div>
+      <div class="f"><label for="date">Preferred date</label><input id="date" name="preferred_date" type="date" required></div>
+      <div class="f full"><label for="notes">Notes (optional)</label><textarea id="notes" name="message" placeholder="Hotel name, number of people, questions..."></textarea></div>
+      <div class="f full"><button class="btn" type="submit" id="submit">Submit application</button>
+        <p id="result" class="result" role="status"></p></div>
+    </form>
+    <p class="muted" style="margin-top:20px">Prefer email? Write to <a href="mailto:hello@example.com">hello@example.com</a></p>
   </div>
 </section>
 
 <footer>
   <div class="wrap">© 2026 Mainland Licence Service</div>
 </footer>
+<script>
+(function(){
+  var form=document.getElementById("form"),btn=document.getElementById("submit"),out=document.getElementById("result");
+  var d=new Date();d.setDate(d.getDate()+2);document.getElementById("date").min=d.toISOString().slice(0,10);
+  form.addEventListener("submit",async function(e){
+    e.preventDefault();
+    btn.disabled=true;btn.textContent="Sending...";out.textContent="";out.className="result";
+    try{
+      var res=await fetch("https://api.web3forms.com/submit",{method:"POST",body:new FormData(form)});
+      var data=await res.json();
+      if(res.ok&&data.success){out.textContent="Thanks! We've received your application and will reply within one working day.";out.className="result ok";form.reset();}
+      else{out.textContent="Sorry, it didn't send: "+(data.message||"please try again or email us.");out.className="result bad";}
+    }catch(err){out.textContent="Couldn't connect. Please check your internet and try again, or email us.";out.className="result bad";}
+    btn.disabled=false;btn.textContent="Submit application";
+  });
+})();
+</script>
 </body>
 </html>
