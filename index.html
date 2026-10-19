@@ -185,7 +185,7 @@ footer{border-top:1px solid var(--line);padding-block:24px;font-size:.85rem;colo
       <input type="hidden" name="from_name" value="Mainland Licence Website">
       <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
       <div class="f"><label for="name">Full name</label><input id="name" name="name" autocomplete="name" required></div>
-      <div class="f"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+      <div class="f"><label for="email">Email (optional)</label><input id="email" name="email" type="email" autocomplete="email"></div>
       <div class="f"><label for="phone">Phone / WhatsApp</label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
       <div class="f"><label for="licence">Licence type</label>
         <select id="licence" name="licence_type"><option>Hong Kong licence</option><option>Foreign licence</option></select></div>
@@ -217,8 +217,9 @@ footer{border-top:1px solid var(--line);padding-block:24px;font-size:.85rem;colo
   form.addEventListener("submit",async function(e){
     e.preventDefault();
     btn.disabled=true;btn.textContent="Sending...";out.textContent="";out.className="result";
+    var fd=new FormData(form);if(!fd.get("email"))fd.delete("email");
     try{
-      var res=await fetch("https://api.web3forms.com/submit",{method:"POST",body:new FormData(form)});
+      var res=await fetch("https://api.web3forms.com/submit",{method:"POST",body:fd});
       var data=await res.json();
       if(res.ok&&data.success){out.textContent="Thanks! We've received your application and will reply within one working day.";out.className="result ok";form.reset();}
       else{out.textContent="Sorry, it didn't send: "+(data.message||"please try again or email us.");out.className="result bad";}
